@@ -33,7 +33,14 @@
       <form
         id="recruiter-form"
         class="space-y-3 bg-white p-6 rounded-xl shadow-md hidden"
+        enctype="multipart/form-data"
       >
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Company Logo</h3>
+        <input name="company_logo" placeholder="Upload Company Logo"
+        type="file"
+        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">
           Company Name
         </h3>
@@ -42,6 +49,16 @@
           placeholder="Company Name"
           class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
         />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          Industry
+        </h3>
+        <input
+          name="industry"
+          placeholder="industry"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">
           Company Website
         </h3>
@@ -50,12 +67,42 @@
           placeholder="Company Website (https://...)"
           class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
         />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          Phone no.
+        </h3>
+        <input
+          name="phone"
+          placeholder="Phone no."
+          type="tel"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          email
+        </h3>
+        <input
+          name="email"
+          placeholder="email"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Location</h3>
         <input
           name="location"
           placeholder="Location"
           class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
         />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          Linkedn URL
+        </h3>
+        <input
+          name="linked_url"
+          placeholder="Linkedin URL"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">
           About Company
         </h3>
@@ -96,6 +143,7 @@
       <form
         id="freelancer-form"
         class="space-y-3 bg-white p-6 rounded-xl shadow-md hidden"
+        enctype="multipart/form-data"
       >
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Name</h3>
         <input
@@ -112,6 +160,20 @@
           type="date"
           class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
         />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Phone no.</h3>
+        <input type="tel" name="phone" placeholder="Phone no." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"/>
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Email</h3>
+        <input type="email" name="email" placeholder="Email" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"/>
+
+        
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Location</h3>
+        <input type="text" name="location" 
+        placeholder="City,State" 
+        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Education</h3>
         <textarea
           name="education"
@@ -170,12 +232,29 @@
 
         <!-- Hidden input that will actually submit the skills -->
         <input type="hidden" name="skills" id="skills-hidden" />
+
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">
           Portfolio URL
         </h3>
         <input
           name="portfolio_url"
           placeholder="Portfolio URL"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          GitHub URL
+        </h3>
+        <input
+          name="github_url"
+          placeholder="GitHub URL"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          Linkedin URL
+        </h3>
+        <input
+          name="linked_url"
+          placeholder="Linkedin URL"
           class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
         />
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Resume</h3>
@@ -185,6 +264,34 @@
           type="file"
           class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
         />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          Expected hourly rate (in USD)
+        </h3>
+        <input
+          type="number"
+          step="0.5"
+          min="0.0"
+          name="expected_salary"
+          placeholder="$0.00"
+          class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+        />
+
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">
+          Availability
+        </h3>
+        <select
+          name="availability"
+          id="availability"
+          class="border rounded w-full p-2"
+        >
+          <option value="">-- Select Availability --</option>
+          <option value="immediate">Immediate</option>
+          <option value="oneweek">1 Week</option>
+          <option value="twoweek">2 Weeks</option>
+          <option value="amonth">1 Month</option>
+          <option value="openToOffers">Open to offers</option>
+        </select>
 
         <div class="flex justify-between">
           <button
