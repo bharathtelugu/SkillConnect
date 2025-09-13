@@ -45,10 +45,28 @@ document.addEventListener("DOMContentLoaded", () => {
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Recruiter Profile</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Company Logo</h3>
+        <p class="text-lg font-semibold mt-2">
+          ${
+            data.company_logo
+              ? `<a href="${data.company_logo}" target="_blank" class="text-blue-600 hover:underline">Company Logo</a>`
+              : "N/A"
+          }
+        </p>
+      </div>
+
       <div class="border p-4 rounded-lg bg-gray-50">
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Company Name</h3>
         <p class="text-lg font-semibold text-gray-800 mt-1">${
           data.company_name || "N/A"
+        }</p>
+      </div>
+      <div class="border p-4 rounded-lg bg-gray-50">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Industry</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-1">${
+          data.industry || "N/A"
         }</p>
       </div>
 
@@ -64,10 +82,35 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <div class="border p-4 rounded-lg bg-gray-50">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Phone no.</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-1">${
+          data.phone || "N/A"
+        }</p>
+      </div>
+
+      <div class="border p-4 rounded-lg bg-gray-50">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Email</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-1">${
+          data.email || "N/A"
+        }</p>
+      </div>
+
+      <div class="border p-4 rounded-lg bg-gray-50">
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Location</h3>
         <p class="text-lg font-semibold text-gray-800 mt-1">${
           data.location || "N/A"
         }</p>
+      </div>
+
+      <div class="border p-4 rounded-lg bg-gray-50">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Linkedin URL</h3>
+        <p class="text-lg font-semibold mt-1">
+          ${
+            data.linkedin_url
+              ? `<a href="${data.linkedin_url}" target="_blank" class="text-blue-600 hover:underline">${data.linkedin_url}</a>`
+              : "N/A"
+          }
+        </p>
       </div>
 
       <div class="border p-4 rounded-lg bg-gray-50 col-span-1 md:col-span-2">
@@ -90,10 +133,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // Edit button logic
     document.getElementById("edit-recruiter").onclick = () => {
       // Prefill
+      form.company_logo_url = data.company_logo_url || "";
       form.company_name.value = data.company_name || "";
       form.company_website.value = data.company_website || "";
       form.location.value = data.location || "";
       form.about.value = data.about || "";
+      form.industry = data.industry || "";
+      form.phone = data.phone || "";
+      form.email = data.email || "";
+      form.linkedin_url = data.linkedin_url || "";
+
 
       view.classList.add("hidden");
       form.classList.remove("hidden");
@@ -121,11 +170,20 @@ document.addEventListener("DOMContentLoaded", () => {
         payload.company_website = "https://" + payload.company_website;
       }
 
+      if (
+        payload.linkedin_url &&
+        !/^https?:\/\//i.test(payload.linkedin_url)
+      ) {
+        payload.linkedin_url = "https://" + payload.linkedin_url;
+      }
+
       try {
         const res = await fetch(`${API}/profiles/profile/recruiter/me/`, {
           method: "PATCH",
-          headers,
-          body: JSON.stringify(payload),
+          headers: {
+            Authorization: `Bearer ${access}`,
+          },
+          body: fd,
         });
 
         if (!res.ok) {
@@ -153,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     view.innerHTML = `
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Freelancer Profile</h2>
 
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Name</h3>
         <p class="text-lg font-semibold text-gray-800 mt-2">${
@@ -165,6 +223,27 @@ document.addEventListener("DOMContentLoaded", () => {
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Date of Birth</h3>
         <p class="text-lg font-semibold text-gray-800 mt-2">${
           data.dob || "N/A"
+        }</p>
+      </div>
+
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Phone No.</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-2">${
+          data.phone || "N/A"
+        }</p>
+      </div>
+
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Email</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-2">${
+          data.email || "N/A"
+        }</p>
+      </div>
+
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Location</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-2">${
+          data.location || "N/A"
         }</p>
       </div>
 
@@ -204,6 +283,28 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">GitHub URL</h3>
+        <p class="text-lg font-semibold mt-2">
+          ${
+            data.github_url
+              ? `<a href="${data.github_url}" target="_blank" class="text-blue-600 hover:underline">${data.github_url}</a>`
+              : "N/A"
+          }
+        </p>
+      </div>
+
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Linkedin URL</h3>
+        <p class="text-lg font-semibold mt-2">
+          ${
+            data.linkedin_url
+              ? `<a href="${data.linkedin_url}" target="_blank" class="text-blue-600 hover:underline">${data.linkedin_url}</a>`
+              : "N/A"
+          }
+        </p>
+      </div>
+
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
         <h3 class="text-sm text-gray-500 uppercase tracking-wide">Resume</h3>
         <p class="text-lg font-semibold mt-2">
           ${
@@ -213,7 +314,22 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         </p>
       </div>
+      
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Expected hourly rate (in USD)</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-2">${
+          data.expected_salary || "N/A"
+        }</p>
+      </div>
+  
+      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
+        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Availability</h3>
+        <p class="text-lg font-semibold text-gray-800 mt-2">${
+          data.availability_display || "N/A"
+        }</p>
+      </div>
     </div>
+
 
     <div class="mt-8 text-right">
       <button id="edit-freelancer"
@@ -231,9 +347,16 @@ document.addEventListener("DOMContentLoaded", () => {
       editBtn.onclick = () => {
         form.name.value = data.name || "";
         form.dob.value = data.dob || "";
+        form.phone.value = data.phone || "";
+        form.email.value = data.email || "";
+        form.location.value = data.location || "";
         form.education.value = data.education || "";
         form.experience.value = data.experience || "";
         form.portfolio_url.value = data.portfolio_url || "";
+        form.github_url.value = data.github_url || "";
+        linkedin_url = data.linkedin_url || "";
+        expected_salary = data.expected_salary || "";
+        availability = data.availability || "";
 
         const selectedIds = data.skills
           ? data.skills.map((s) => s.id.toString())
@@ -270,6 +393,20 @@ document.addEventListener("DOMContentLoaded", () => {
         !/^https?:\/\//i.test(fd.get("portfolio_url"))
       ) {
         fd.set("portfolio_url", "https://" + fd.get("portfolio_url"));
+      }
+
+      if (
+        fd.get("github_uel") &&
+        !/^https?:\/\//i.test(fd.get("github_url"))
+      ) {
+        fd.set("github_url", "https://" + fd.get("github_url"));
+      }
+
+      if (
+        fd.get("linkedin_url") &&
+        !/^https?:\/\//i.test(fd.get("linkedin_url"))
+      ) {
+        fd.set("linkedin_url", "https://" + fd.get("linkedin_url"));
       }
 
       const selectedSkills = Array.from(
