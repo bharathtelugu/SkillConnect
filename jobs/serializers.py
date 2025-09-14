@@ -20,13 +20,13 @@ class JobSerializer(serializers.ModelSerializer):
             return obj.applications.filter(freelancer=user).exists()
         return False
     
-    location_display = serializers.CharField(source="get_location_display", read_only=True)
+    work_mode_display = serializers.CharField(source="get_work_mode_display", read_only=True)
 
     picture_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
-        fields = ["id", "title", "pay_per_hour", "skills", "skills_ids", "requirements", "recruiter_email", "location", "location_display", "created_at", "already_applied","picture", "picture_url"]
+        fields = ["id", "title", "pay_per_hour", "skills", "skills_ids", "requirements", "recruiter_email", "work_mode", "work_mode_display", "location", "created_at", "already_applied","picture", "picture_url", "key_responsibilities"]
 
     def get_picture_url(self,obj):
         request = self.context.get("request")
