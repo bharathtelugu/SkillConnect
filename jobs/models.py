@@ -19,10 +19,12 @@ class Job(models.Model):
     title = models.CharField(max_length=255)
     pay_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     skills = models.ManyToManyField(Skill, related_name='jobs', blank=True)
-    requirements = models.TextField()
-    location = models.CharField(max_length=20, choices=[("remote","Remote"),("hybrid","Hybrid"),("inoffice","In-Office")], default="applied")
+    requirements = models.TextField(blank=False, null=False)
+    work_mode = models.CharField(max_length=20, choices=[("remote","Remote"),("hybrid","Hybrid"),("inoffice","In-Office")], default="applied")
+    location = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     picture = models.ImageField(upload_to=picture_upload_path, blank=True, null=True)
+    key_responsibilities = models.TextField(blank=False, null=False)
 
     def __str__(self):
         return f"{self.title} ({self.recruiter.email})"

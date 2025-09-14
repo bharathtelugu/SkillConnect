@@ -5,6 +5,18 @@ if (!access || role !== "recruiter") {
   window.location.href = "auth.html";
 }
 
+const workModeSelect = document.getElementById('work_mode');
+const locationDiv = document.getElementById('location_div');
+
+workModeSelect.addEventListener('change', function () {
+  const selectedValue = this.value.toLowerCase();
+  if (selectedValue === 'inoffice' || selectedValue === 'hybrid') {
+    locationDiv.style.display = 'block';
+  } else {
+    locationDiv.style.display = 'none';
+  }
+});
+
 // Function to fetch and populate the skills dropdown
 async function loadSkillsOptions() {
   try {
