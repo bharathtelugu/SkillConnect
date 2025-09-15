@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillConnect - Recruiter Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* This style is for the mobile menu transition */
+        .mobile-menu {
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .mobile-menu.active {
+            max-height: 500px; /* A large value to allow the menu to expand */
+        }
+        /* Style for the profile dropdown menu */
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 12rem;
+            z-index: 10;
+        }
+        .profile-dropdown.active {
+            display: block;
+        }
+        /* Chart container with fixed height */
+        .chart-container {
+            position: relative;
+            height: 18rem; /* Equivalent to Tailwind's h-72 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <nav class="bg-white shadow-lg p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold text-blue-600">SkillConnect</h1>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <ul class="hidden md:flex items-center space-x-6">
+                    <li><a href="#" class="text-gray-700 font-semibold hover:text-blue-600 transition-colors duration-200">Dashboard</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600 transition-colors duration-200">Post Job</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600 transition-colors duration-200">My Jobs</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600 transition-colors duration-200">Applications</a></li>
+                </ul>
+
+                <div class="relative hidden md:block">
+                    <button id="profile-btn" class="flex items-center focus:outline-none">
+                        <img class="h-10 w-10 rounded-full object-cover" src="" alt="Profile Picture">
+                    </button>
+                    <div id="profile-dropdown" class="profile-dropdown">
+                        <ul class="py-1">
+                            <li><a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Your Profile</a></li>
+                            <li><a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button id="menu-btn" class="md:hidden p-2 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path id="menu-icon" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="mobile-menu" class="mobile-menu md:hidden bg-white mt-4 rounded-lg shadow-md">
+            <li><a href="#" class="block px-4 py-3 text-gray-700 font-semibold hover:bg-gray-100">Dashboard</a></li>
+            <li><a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-100">Post Job</a></li>
+            <li><a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-100">My Jobs</a></li>
+            <li><a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-100">Applications</a></li>
+            <li><a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-100">Profile</a></li>
+            <li class="border-t border-gray-200"><a href="#" class="block px-4 py-3 text-gray-700 hover:bg-gray-100">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="md:col-span-3 lg:col-span-3 bg-white shadow-md p-6 flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Welcome back, Recruiter! 👋</h2>
+                <p id="today-date" class="text-lg text-gray-500 mt-2">Monday, September 15, 2025</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 md:mt-0">
+                <button class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                    ➕ Post Job
+                </button>
+                <button class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                    📂 View My Jobs
+                </button>
+                <button class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                    👥 Review Applications
+                </button>
+            </div>
+        </div>
+
+        <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <h3 class="text-gray-500 font-medium text-sm">Total Jobs Posted</h3>
+                <div class="text-4xl font-bold text-gray-800 mt-2">
+                    <span class="animated-number" data-target="125">0</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <h3 class="text-gray-500 font-medium text-sm">Active Jobs</h3>
+                <div class="text-4xl font-bold text-blue-600 mt-2">
+                    <span class="animated-number" data-target="87">0</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <h3 class="text-gray-500 font-medium text-sm">Pending Applications</h3>
+                <div class="text-4xl font-bold text-yellow-500 mt-2">
+                    <span class="animated-number" data-target="32">0</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <h3 class="text-gray-500 font-medium text-sm">Accepted / Rejected</h3>
+                <div class="text-4xl font-bold text-green-600 mt-2">
+                    <span class="animated-number" data-target="93">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 px-6">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Applications</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Freelancer</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">John Doe</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Frontend Developer</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-green-600 hover:text-green-900 mr-2">Accept</button>
+                                    <button class="text-red-600 hover:text-red-900">Reject</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Jane Smith</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">UX/UI Designer</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Accepted</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-green-600 hover:text-green-900 mr-2">Accept</button>
+                                    <button class="text-red-600 hover:text-red-900">Reject</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Mike Johnson</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Backend Developer</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-green-600 hover:text-green-900 mr-2">Accept</button>
+                                    <button class="text-red-600 hover:text-red-900">Reject</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Chris Lee</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Data Scientist</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-green-600 hover:text-green-900 mr-2">Accept</button>
+                                    <button class="text-red-600 hover:text-red-900">Reject</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Sarah Chen</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Mobile App Developer</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-green-600 hover:text-green-900 mr-2">Accept</button>
+                                    <button class="text-red-600 hover:text-red-900">Reject</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 text-center">
+                    <button class="text-blue-600 font-semibold hover:underline">View All Applications &rarr;</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Applications per Job</h2>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Application Status</h2>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-1 px-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+                <ul class="space-y-4">
+                    <li class="border-b pb-2 last:border-b-0 last:pb-0">
+                        <p class="text-gray-700"><strong>John Doe</strong> applied for the <span class="text-blue-600 font-medium">Frontend Developer</span> job.</p>
+                        <span class="text-gray-500 text-xs">2 hours ago</span>
+                    </li>
+                    <li class="border-b pb-2 last:border-b-0 last:pb-0">
+                        <p class="text-gray-700">You posted a new job: <span class="text-blue-600 font-medium">Data Scientist</span>.</p>
+                        <span class="text-gray-500 text-xs">4 hours ago</span>
+                    </li>
+                    <li class="border-b pb-2 last:border-b-0 last:pb-0">
+                        <p class="text-gray-700"><strong>Jane Smith</strong>'s application for <span class="text-blue-600 font-medium">UX/UI Designer</span> was accepted.</p>
+                        <span class="text-gray-500 text-xs">1 day ago</span>
+                    </li>
+                    <li class="border-b pb-2 last:border-b-0 last:pb-0">
+                        <p class="text-gray-700">You updated the <span class="text-blue-600 font-medium">Backend Developer</span> job description.</p>
+                        <span class="text-gray-500 text-xs">2 days ago</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script src="./recruiter_dashboard.js"></script>
+
+</body>
+</html>
