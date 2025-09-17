@@ -35,15 +35,26 @@ class FreelancerProfileSerializer(serializers.ModelSerializer):
 
     availability_display = serializers.CharField(source="get_availability_display", read_only=True)
 
-    resume_url = serializers.SerializerMethodField()
+    resume = serializers.FileField(read_only=True) 
+    resume_upload = serializers.FileField(write_only=True, required=False)
+
+    # resume_url = serializers.SerializerMethodField()
 
     class Meta:
         model = FreelancerProfile
-        fields = ["name","dob","education", "experience", "experience_display", "skills", "skill_ids", "portfolio_url","resume", "resume_url",
+        fields = ["name","dob","education", "experience", "experience_display", "skills", "skill_ids", "portfolio_url","resume", "resume_upload",
                   "email", "phone", "location", "github_url", "linkedin_url", "expected_salary", "availability", "availability_display"]
     
-    def get_resume_url(self,obj):
-        request = self.context.get("request")
-        if obj.resume and request:
-            return request.build_absolute_uri(obj.resume.url)
-        return None
+    # def get_resume_url(self,obj):
+    #     request = self.context.get("request")
+    #     if obj.resume and request:
+    #         return request.build_absolute_uri(obj.resume.url)
+    #     return None
+
+    def update(self,instance, validated_data):
+        new_resume = validated_data.pop('resume_upload', None)
+
+        if new_resume:
+            instance.resume = new_resume
+        
+        return super().update(instance, validated_data)

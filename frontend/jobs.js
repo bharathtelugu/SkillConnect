@@ -5,12 +5,11 @@ if (!access || role !== "freelancer") {
   window.location.href = "auth.html";
 }
 
-// --- NEW: State variables for pagination and loading status ---
 let currentPage = 1;
 let isLoading = false;
 let hasMoreJobs = true;
 
-// --- NEW: Debounce function to prevent excessive API calls while typing ---
+
 function debounce(func, delay) {
   let timeout;
   return function(...args) {
@@ -19,20 +18,20 @@ function debounce(func, delay) {
   };
 }
 
-// --- MODIFIED: The main function to load jobs ---
+
 async function loadJobs(shouldAppend = false) {
   if (isLoading) return;
   isLoading = true;
 
   if (!shouldAppend) {
-    currentPage = 1; // Reset page number for new filters
+    currentPage = 1;
     hasMoreJobs = true;
   }
   
   const jobsList = document.getElementById("jobsList");
   const loadMoreContainer = document.getElementById('load-more-container');
 
-  // Show loading indicator
+
   if (!shouldAppend) {
     jobsList.innerHTML = `<p class="text-gray-600 col-span-full text-center">Loading jobs...</p>`;
   } else {
@@ -42,7 +41,7 @@ async function loadJobs(shouldAppend = false) {
 
   try {
     const params = collectFilterParams();
-    params.append('page', currentPage); // Add page number to request
+    params.append('page', currentPage);
     
     const res = await fetch(`${API}/jobs/job/?${params.toString()}`, {
       headers: { Authorization: "Bearer " + access },
@@ -53,11 +52,11 @@ async function loadJobs(shouldAppend = false) {
     const jobs = await res.json();
     
     if (jobs.length === 0) {
-      hasMoreJobs = false; // No more jobs to load
+      hasMoreJobs = false;
       if (!shouldAppend) {
         jobsList.innerHTML = `<p class="text-gray-600 col-span-full text-center">No jobs found with these filters.</p>`;
       }
-      return; // Exit if no jobs are returned
+      return;
     }
 
     const jobsHtml = jobs.map(job => `
@@ -82,8 +81,8 @@ async function loadJobs(shouldAppend = false) {
       jobsList.innerHTML = jobsHtml;
     }
 
-    // NEW: Logic to show/hide the "Load More" button
-    if (jobs.length < 10) { // Assuming your API returns 10 items per page
+
+    if (jobs.length < 10) {
         hasMoreJobs = false;
     }
 
@@ -107,7 +106,6 @@ async function loadJobs(shouldAppend = false) {
   }
 }
 
-// --- NEW: Helper function to gather all filter values ---
 function collectFilterParams() {
   const params = new URLSearchParams();
   const keyword = document.getElementById("search-keyword").value;
@@ -124,7 +122,6 @@ function collectFilterParams() {
   return params;
 }
 
-// --- MODIFIED: Event listeners for live filtering ---
 document.getElementById("search-keyword").addEventListener("input", debounce(() => loadJobs(false), 500));
 document.getElementById("minPay").addEventListener("input", debounce(() => loadJobs(false), 500));
 document.getElementById("location").addEventListener("change", () => loadJobs(false));
@@ -139,7 +136,6 @@ document.getElementById("clearFilters").addEventListener("click", () => {
   loadJobs(false);
 });
 
-// --- Skills Dropdown Logic (with a hook for live filtering) ---
 async function loadSkillsOptions() {
   try {
     const res = await fetch(`${API}/profiles/skills/`, { headers: { Authorization: "Bearer " + access } });
@@ -165,7 +161,6 @@ async function loadSkillsOptions() {
       label.textContent = checked.length > 0 ? checked.map(c => c.name).join(", ") : "Select Skills";
       hiddenInput.value = checked.map(c => c.id).join(",");
       
-      // NEW: Trigger job search when skills change
       loadJobs(false);
     }
 
@@ -177,7 +172,7 @@ async function loadSkillsOptions() {
   }
 }
 
-// Logic to toggle the dropdown's visibility
+
 const toggle = document.getElementById("skills-toggle");
 const menu = document.getElementById("skills-menu");
 if (toggle && menu) {
@@ -189,6 +184,5 @@ if (toggle && menu) {
   });
 }
 
-// --- Initial Page Load ---
 loadJobs();
 loadSkillsOptions();

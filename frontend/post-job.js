@@ -7,32 +7,29 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // --- NEW: Detect Edit Mode and Job ID from URL ---
   const form = document.getElementById("postJobForm");
   const urlParams = new URLSearchParams(window.location.search);
   const jobIdToEdit = urlParams.get('edit');
-  const isEditMode = !!jobIdToEdit; // Converts to true if jobIdToEdit is not null
+  const isEditMode = !!jobIdToEdit;
 
   const workModeSelect = document.getElementById('work_mode');
   const locationDiv = document.getElementById('location_div');
   
-  // --- Main Initialization Logic ---
   async function initializePage() {
     if (isEditMode) {
-      // Update UI for editing
+
       document.title = 'Edit Job • Skill Connect';
       document.querySelector('h2').textContent = 'Edit Job';
       document.querySelector('button[type="submit"]').textContent = 'Update Job';
       
-      // Fetch the specific job's data and populate the form
+
       await loadJobDataForEditing(jobIdToEdit);
     } else {
-      // Just load empty skill options for a new job
       await loadSkillsOptions();
     }
   }
 
-  // --- NEW: Function to fetch job data and pre-fill the form ---
+
   async function loadJobDataForEditing(jobId) {
     try {
       const res = await fetch(`${API}/jobs/job/${jobId}/`, {
@@ -43,33 +40,31 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const job = await res.json();
 
-      // Pre-fill form fields
       form.title.value = job.title;
       form.pay_per_hour.value = job.pay_per_hour;
       form.requirements.value = job.requirements;
       form.key_responsibilities.value = job.key_responsibilities;
       form.work_mode.value = job.work_mode;
       
-      // Trigger change event to show/hide location field
       workModeSelect.dispatchEvent(new Event('change')); 
       if (job.location) {
         form.location.value = job.location;
       }
       
-      // Extract the IDs of the skills already associated with the job
+
       const selectedSkillIds = job.skills.map(skill => skill.id.toString());
       
-      // Load all skill options, ensuring the correct ones are pre-selected
+
       await loadSkillsOptions(selectedSkillIds);
 
     } catch (err) {
       showNotification(err.message, "error");
-      // Redirect if the job can't be loaded
+
       setTimeout(() => window.location.href = 'my-jobs.html', 1500);
     }
   }
 
-  // --- MODIFIED: loadSkillsOptions now accepts pre-selected IDs ---
+
   async function loadSkillsOptions(selectedIds = []) {
     try {
       const res = await fetch(`${API}/profiles/skills/`, {
@@ -107,14 +102,13 @@ document.addEventListener("DOMContentLoaded", () => {
         checkbox.addEventListener("change", updateSelection);
       });
 
-      updateSelection(); // Initial call to set label and hidden input correctly
+      updateSelection();
 
     } catch (err) {
       console.error(err);
     }
   }
 
-  // --- Event Listeners ---
   workModeSelect.addEventListener('change', function () {
     const selectedValue = this.value.toLowerCase();
     locationDiv.style.display = (selectedValue === 'inoffice' || selectedValue === 'hybrid') ? 'block' : 'none';
@@ -131,18 +125,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- MODIFIED: Form submission handles both CREATE (POST) and EDIT (PATCH) ---
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
     
-    // API endpoint and method depend on whether we are in edit mode
     const url = isEditMode 
       ? `${API}/jobs/job/${jobIdToEdit}/edit/` 
       : `${API}/jobs/job/create/`;
     const method = isEditMode ? 'PATCH' : 'POST';
     
-    // Handle skills separately for FormData
     const selectedSkills = document.getElementById("skills-hidden").value;
     const skillIds = selectedSkills ? selectedSkills.split(",") : [];
     
@@ -162,7 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
       
       showNotification(`Job ${isEditMode ? 'updated' : 'posted'} successfully ✅`, "success");
 
-      // MODIFIED: Redirect logic without parsing the JSON response
       setTimeout(() => {
         window.location.href = `job-detail.html?id=${jobIdToEdit}`;
       }, 1000);
@@ -173,6 +163,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("logout").addEventListener("click", () => logout());
 
-  // --- Start the page logic ---
   initializePage();
 });

@@ -28,7 +28,9 @@ class RecruiterProfile(models.Model):
         return f"RecruiterProfile<{self.user}>"
 
 def resume_upload_path(instance, filename):
-    return f"resume/user_{instance.user.id}/{filename}"
+    ext = os.path.splitext(filename)[1]
+    new_filename = f"{uuid.uuid4()}{ext}"
+    return os.path.join('resume',f'user_{instance.user.id}', new_filename)
 
 ###########################################################
 

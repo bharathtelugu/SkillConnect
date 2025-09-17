@@ -20,6 +20,7 @@ function renderNavbar() {
     `;
   } else if (role === "freelancer") {
     navbar.innerHTML = `
+    <button onclick="window.location.href='freelancer_dashboard.html'" class="text-gray-700 hover:text-blue-600">Dashboard</button>
     <button onclick="window.location.href='jobs.html'" class="text-gray-700 hover:text-blue-600">Browse Jobs</button>
     <button onclick="window.location.href='my-applications.html'" class="text-gray-700 hover:text-blue-600">My Applications</button>
     <button onclick="window.location.href='profile-setup.html'" class="text-gray-700 hover:text-blue-600">Profile (${role})</button>

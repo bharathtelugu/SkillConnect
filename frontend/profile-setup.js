@@ -354,9 +354,27 @@ document.addEventListener("DOMContentLoaded", () => {
         form.experience.value = data.experience || "";
         form.portfolio_url.value = data.portfolio_url || "";
         form.github_url.value = data.github_url || "";
-        linkedin_url = data.linkedin_url || "";
-        expected_salary = data.expected_salary || "";
-        availability = data.availability || "";
+        form.linkedin_url.value = data.linkedin_url || "";
+        form.expected_salary.value = data.expected_salary || "";
+        form.availability.value = data.availability || "";
+
+
+    const resumeDisplay = document.getElementById("current-resume-display");
+    
+    if (data.resume) {
+      resumeDisplay.innerHTML = `
+        <p class="mb-1">
+          <b>Current Resume:</b> 
+          <a href="${data.resume}" target="_blank" class="text-blue-600 hover:underline">
+            View File
+          </a>
+        </p>
+        <p class="text-xs text-gray-500">Upload a new file below only if you want to replace it.</p>
+      `;
+    } else {
+      resumeDisplay.innerHTML = "";
+    }
+
 
         const selectedIds = data.skills
           ? data.skills.map((s) => s.id.toString())
