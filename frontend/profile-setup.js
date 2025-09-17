@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (
-        fd.get("github_uel") &&
+        fd.get("github_url") &&
         !/^https?:\/\//i.test(fd.get("github_url"))
       ) {
         fd.set("github_url", "https://" + fd.get("github_url"));

@@ -79,12 +79,42 @@ class ApplyJobView(generics.CreateAPIView):
             application.save()
 
 # Freelancer views their own applications
+# class MyApplicationsView(generics.ListAPIView):
+#     serializer_class = ApplicationSerializer
+#     permission_classes = [permissions.IsAuthenticated, IsFreelancer]
+
+#     def get_queryset(self):
+#         return Application.objects.filter(freelancer=self.request.user)
+
+# This is the updated view with filtering and sorting logic
 class MyApplicationsView(generics.ListAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated, IsFreelancer]
 
     def get_queryset(self):
-        return Application.objects.filter(freelancer=self.request.user)
+        # Start with the base queryset for the logged-in user
+        queryset = Application.objects.filter(freelancer=self.request.user)
+
+        # Get 'status' from URL parameters (e.g., ?status=accepted)
+        status = self.request.query_params.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Get 'ordering' from URL parameters (e.g., ?ordering=-created_at)
+        ordering = self.request.query_params.get('ordering')
+        if ordering in ['created_at', '-created_at']: # Check for valid options
+            queryset = queryset.order_by(ordering)
+        else:
+            # Default to newest first if no valid ordering is provided
+            queryset = queryset.order_by('-created_at')
+
+        return queryset
+    
+
+
+
+
+    
 
 # Recruiter views applications for their jobs
 class ApplicationsForMyJobsView(generics.ListAPIView):
@@ -102,6 +132,14 @@ class JobDeleteView(generics.DestroyAPIView):
 
     def get_queryset(self):
         # Only allow recruiters to delete jobs they own
+        return Job.objects.filter(recruiter=self.request.user)
+    
+# Recruiter can edit their own job
+class JobUpdateView(generics.RetrieveUpdateAPIView):
+    serializer_class = JobSerializer
+    permission_classes = [permissions.IsAuthenticated, IsRecruiter]
+
+    def get_queryset(self):
         return Job.objects.filter(recruiter=self.request.user)
 
 #recruiter can manage the applications for their own job

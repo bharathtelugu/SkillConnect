@@ -8,10 +8,10 @@ function renderNavbar() {
   if (!navbar) return;
 
   const role = localStorage.getItem("role");
-  // navbar.innerHTML=``;
 
   if (role === "recruiter") {
     navbar.innerHTML = `
+    <button onclick="window.location.href='recruiter_dashboard.html'" class="text-gray-700 hover:text-blue-600">Dashboard</button>
     <button onclick="window.location.href='post-job.html'" class="text-gray-700 hover:text-blue-600">Post Job</button>
     <button onclick="window.location.href='my-jobs.html'" class="text-gray-700 hover:text-blue-600">My Jobs</button>
     <button onclick="window.location.href='applications.html'" class="text-gray-700 hover:text-blue-600">Applications</button>

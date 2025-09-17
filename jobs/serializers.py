@@ -35,7 +35,55 @@ class JobSerializer(serializers.ModelSerializer):
         return None
 
 
+# class ApplicationSerializer(serializers.ModelSerializer):
+#     freelancer_email = serializers.ReadOnlyField(source="freelancer.email")
+#     freelancer_name = serializers.SerializerMethodField()
+#     job_title = serializers.ReadOnlyField(source="job.title")
+#     recruiter_company = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Application
+#         fields = [
+#             "id",
+#             "job",
+#             "job_title",
+#             "recruiter_company",
+#             "freelancer_email",
+#             "freelancer_name",
+#             "resume",
+#             "status",
+#             "created_at",
+#         ]
+#         read_only_fields = ["resume", "created_at"]
+
+#     def get_freelancer_name(self, obj):
+#         user = obj.freelancer
+#         profile = getattr(user, "freelancer_profile", None)
+#         if profile and getattr(profile, "name", None):
+#             return profile.name
+#         try:
+#             full = user.get_full_name()
+#             if full:
+#                 return full
+#         except Exception:
+#             pass
+#         return getattr(user, "email", "Unknown")
+    
+#     def get_recruiter_company(self, obj):
+#         recruiter_profile = getattr(obj.job.recruiter, "recruiter_profile", None)
+#         if recruiter_profile and recruiter_profile.company_name:
+#             return recruiter_profile.company_name
+#         return obj.job.recruiter.email  # fallback
+
+# your_project/jobs/serializers.py
+
 class ApplicationSerializer(serializers.ModelSerializer):
+    # This field is now only used for POST requests (when applying)
+    job = serializers.PrimaryKeyRelatedField(queryset=Job.objects.all(), write_only=True)
+    
+    # NEW: This read-only field provides the job's ID for GET requests
+    job_id = serializers.IntegerField(source='job.id', read_only=True)
+
     freelancer_email = serializers.ReadOnlyField(source="freelancer.email")
     freelancer_name = serializers.SerializerMethodField()
     job_title = serializers.ReadOnlyField(source="job.title")
@@ -45,7 +93,8 @@ class ApplicationSerializer(serializers.ModelSerializer):
         model = Application
         fields = [
             "id",
-            "job",
+            "job", # For writing/applying
+            "job_id", # For reading/displaying
             "job_title",
             "recruiter_company",
             "freelancer_email",
@@ -54,9 +103,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "status",
             "created_at",
         ]
-        read_only_fields = ["resume", "created_at"]
+        # MODIFIED: 'job' is no longer a read_only_field
+        read_only_fields = ["resume", "created_at", "status"] 
 
     def get_freelancer_name(self, obj):
+        # ... your existing method is perfect, no changes needed
         user = obj.freelancer
         profile = getattr(user, "freelancer_profile", None)
         if profile and getattr(profile, "name", None):
@@ -70,6 +121,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
         return getattr(user, "email", "Unknown")
     
     def get_recruiter_company(self, obj):
+        # ... your existing method is perfect, no changes needed
         recruiter_profile = getattr(obj.job.recruiter, "recruiter_profile", None)
         if recruiter_profile and recruiter_profile.company_name:
             return recruiter_profile.company_name
