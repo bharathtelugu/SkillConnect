@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const ICONS = {
+    envelope: 'M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75',
+    phone: 'M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 6.75Z',
+    link: 'M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244',
+    codeBracket: 'M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5',
+    userCircle: 'M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+  };
+
   const { access, role } = getAuth();
   if (!access || !role) {
     window.location.href = "./auth.html";
@@ -10,145 +18,100 @@ document.addEventListener("DOMContentLoaded", () => {
     Authorization: `Bearer ${access}`,
   };
 
+  const createIconListItem = (iconPath, value, isLink = false) => {
+    if (!value) return '';
+    let linkHref = value;
+    if (isLink && !/^https?:\/\//i.test(value)) {
+        linkHref = 'https://' + value;
+    }
+    const displayValue = isLink
+      ? `<a href="${linkHref}" target="_blank" class="text-blue-600 hover:underline break-all">${value.replace(/^(https?:\/\/)/, '')}</a>`
+      : `<span class="break-all">${value}</span>`;
+    return `
+      <li class="flex items-start space-x-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 flex-shrink-0 mt-1"><path stroke-linecap="round" stroke-linejoin="round" d="${iconPath}" /></svg>
+        <span class="text-gray-700">${displayValue}</span>
+      </li>
+    `;
+  };
+
   async function loadProfile() {
     try {
       if (role === "recruiter") {
-        const res = await fetch(`${API}/profiles/profile/recruiter/me/`, {
-          headers,
-        });
+        const res = await fetch(`${API}/profiles/profile/recruiter/me/`, { headers });
         if (res.ok) {
           const data = await res.json();
           renderRecruiterView(data);
-        }
+        } else { throw new Error(`Server responded with status: ${res.status}`); }
       } else {
-        const res = await fetch(`${API}/profiles/profile/freelancer/me/`, {
-          headers,
-        });
+        const res = await fetch(`${API}/profiles/profile/freelancer/me/`, { headers });
         if (res.ok) {
           const data = await res.json();
           renderFreelancerView(data);
-        }
+        } else { throw new Error(`Server responded with status: ${res.status}`); }
       }
     } catch (err) {
-      showAlert("Failed to load profile", "error");
+      console.error("An error occurred while loading the profile:", err);
+      showAlert("Failed to load profile. See console for details.", "error");
     }
   }
 
-  // --- Recruiter view ---
   function renderRecruiterView(data) {
     const view = document.getElementById("recruiter-view");
     const form = document.getElementById("recruiter-form");
-
     if (!view || !form) return;
-
     view.innerHTML = `
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Recruiter Profile</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Company Logo</h3>
-        <p class="text-lg font-semibold mt-2">
-          ${
-            data.company_logo
-              ? `<a href="${data.company_logo}" target="_blank" class="text-blue-600 hover:underline">Company Logo</a>`
-              : "N/A"
+    <div class="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-200">
+      <div class="flex flex-col md:flex-row items-start md:items-center">
+        <div class="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex items-center justify-center">
+          ${data.company_logo 
+            ? `<img src="${data.company_logo}" alt="Company Logo" class="w-full h-full object-cover rounded-lg">`
+            : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18h18a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 21.75 21H2.25A2.25 2.25 0 0 1 0 18.75V5.25A2.25 2.25 0 0 1 2.25 3Z" /></svg>`
           }
-        </p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Company Name</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-1">${
-          data.company_name || "N/A"
-        }</p>
-      </div>
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Industry</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-1">${
-          data.industry || "N/A"
-        }</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Company Website</h3>
-        <p class="text-lg font-semibold mt-1">
-          ${
-            data.company_website
-              ? `<a href="${data.company_website}" target="_blank" class="text-blue-600 hover:underline">${data.company_website}</a>`
-              : "N/A"
-          }
-        </p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Phone no.</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-1">${
-          data.phone || "N/A"
-        }</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Email</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-1">${
-          data.email || "N/A"
-        }</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Location</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-1">${
-          data.location || "N/A"
-        }</p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Linkedin URL</h3>
-        <p class="text-lg font-semibold mt-1">
-          ${
-            data.linkedin_url
-              ? `<a href="${data.linkedin_url}" target="_blank" class="text-blue-600 hover:underline">${data.linkedin_url}</a>`
-              : "N/A"
-          }
-        </p>
-      </div>
-
-      <div class="border p-4 rounded-lg bg-gray-50 col-span-1 md:col-span-2">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">About</h3>
-        <p class="text-gray-700 mt-1 leading-relaxed">${data.about || "N/A"}</p>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800">${data.company_name || "Company Name N/A"}</h2>
+          <p class="text-lg text-gray-600 mt-1">${data.industry || "Industry not specified"}</p>
+          <div class="flex items-center text-gray-500 mt-2">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+            <span>${data.location || "Location not specified"}</span>
+          </div>
+        </div>
+        <div class="w-full md:w-auto md:ml-auto mt-4 md:mt-0">
+          <button id="edit-recruiter" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">Edit Profile</button>
+        </div>
       </div>
     </div>
-
-    <div class="mt-6 text-right">
-      <button id="edit-recruiter"
-        class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
-        Edit Profile
-      </button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">About Company</h3>
+            <p class="text-gray-700 whitespace-pre-line">${data.about || "No description provided."}</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Contact & Links</h3>
+            <ul class="space-y-3">
+              ${createIconListItem(ICONS.envelope, data.email)}
+              ${createIconListItem(ICONS.phone, data.phone)}
+              ${createIconListItem(ICONS.link, data.company_website, true)}
+              ${createIconListItem(ICONS.userCircle, data.linkedin_url, true)}
+            </ul>
+        </div>
     </div>
-  `;
-
+    `;
     view.classList.remove("hidden");
     form.classList.add("hidden");
-
-    // Edit button logic
     document.getElementById("edit-recruiter").onclick = () => {
-      // Prefill
-      form.company_logo_url = data.company_logo_url || "";
       form.company_name.value = data.company_name || "";
       form.company_website.value = data.company_website || "";
       form.location.value = data.location || "";
       form.about.value = data.about || "";
-      form.industry = data.industry || "";
-      form.phone = data.phone || "";
-      form.email = data.email || "";
-      form.linkedin_url = data.linkedin_url || "";
-
-
+      form.industry.value = data.industry || "";
+      form.phone.value = data.phone || "";
+      form.email.value = data.email || "";
+      form.linkedin_url.value = data.linkedin_url || "";
       view.classList.add("hidden");
       form.classList.remove("hidden");
     };
-
-    // Cancel button (recruiter)
     const cancelRecruiter = document.getElementById("cancel-recruiter");
     if (cancelRecruiter) {
       cancelRecruiter.onclick = (e) => {
@@ -156,42 +119,19 @@ document.addEventListener("DOMContentLoaded", () => {
         renderRecruiterView(data);
       };
     }
-
-    // Save handler
     form.onsubmit = async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-      const payload = Object.fromEntries(fd.entries());
-
-      if (
-        payload.company_website &&
-        !/^https?:\/\//i.test(payload.company_website)
-      ) {
-        payload.company_website = "https://" + payload.company_website;
-      }
-
-      if (
-        payload.linkedin_url &&
-        !/^https?:\/\//i.test(payload.linkedin_url)
-      ) {
-        payload.linkedin_url = "https://" + payload.linkedin_url;
-      }
-
       try {
         const res = await fetch(`${API}/profiles/profile/recruiter/me/`, {
           method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${access}`,
-          },
+          headers: { Authorization: `Bearer ${access}` },
           body: fd,
         });
-
         if (!res.ok) {
           const errData = await res.json();
-          console.error("Recruiter update error:", errData);
           throw new Error(JSON.stringify(errData));
         }
-
         const updated = await res.json();
         showAlert("Profile updated ✅");
         renderRecruiterView(updated);
@@ -201,147 +141,73 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // --- Freelancer view ---
   function renderFreelancerView(data) {
     const view = document.getElementById("freelancer-view");
     const form = document.getElementById("freelancer-form");
-
     if (!view || !form) return;
-
+    const skillsHTML = data.skills?.length > 0
+      ? data.skills.map(skill => `<span class="inline-block bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full">${skill.name}</span>`).join('')
+      : '<p class="text-gray-500">No skills listed.</p>';
     view.innerHTML = `
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Freelancer Profile</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Name</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.name || "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Date of Birth</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.dob || "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Phone No.</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.phone || "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Email</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.email || "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Location</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.location || "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Education</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.education || "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Experience</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.experience_display || "N/A"
-        }</p>
-      </div>
-
-      
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Skills</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.skills && data.skills.length > 0
-            ? data.skills.map((s) => s.name).join(", ")
-            : "N/A"
-        }</p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Portfolio URL</h3>
-        <p class="text-lg font-semibold mt-2">
-          ${
-            data.portfolio_url
-              ? `<a href="${data.portfolio_url}" target="_blank" class="text-blue-600 hover:underline">${data.portfolio_url}</a>`
-              : "N/A"
+    <div class="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-200">
+      <div class="flex flex-col md:flex-row items-start md:items-center">
+        <div class="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex items-center justify-center">
+          ${data.profilepic_url 
+            ? `<img src="${data.profilepic_url}" alt="Profile Picture" class="w-full h-full object-cover rounded-lg">`
+            : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-gray-400"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18h18a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 21.75 21H2.25A2.25 2.25 0 0 1 0 18.75V5.25A2.25 2.25 0 0 1 2.25 3Z" /></svg>`
           }
-        </p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">GitHub URL</h3>
-        <p class="text-lg font-semibold mt-2">
-          ${
-            data.github_url
-              ? `<a href="${data.github_url}" target="_blank" class="text-blue-600 hover:underline">${data.github_url}</a>`
-              : "N/A"
-          }
-        </p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Linkedin URL</h3>
-        <p class="text-lg font-semibold mt-2">
-          ${
-            data.linkedin_url
-              ? `<a href="${data.linkedin_url}" target="_blank" class="text-blue-600 hover:underline">${data.linkedin_url}</a>`
-              : "N/A"
-          }
-        </p>
-      </div>
-
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Resume</h3>
-        <p class="text-lg font-semibold mt-2">
-          ${
-            data.resume
-              ? `<a href="${data.resume}" target="_blank" class="text-blue-600 hover:underline">Download Resume</a>`
-              : "N/A"
-          }
-        </p>
-      </div>
-      
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Expected hourly rate (in USD)</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.expected_salary || "N/A"
-        }</p>
-      </div>
-  
-      <div class="w-full border p-5 rounded-xl bg-gray-50 shadow-sm">
-        <h3 class="text-sm text-gray-500 uppercase tracking-wide">Availability</h3>
-        <p class="text-lg font-semibold text-gray-800 mt-2">${
-          data.availability_display || "N/A"
-        }</p>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800">${data.name || "N/A"}</h2>
+          <p class="text-lg text-gray-600 mt-1">${data.experience_display || "Experience not specified"}</p>
+          <div class="flex items-center text-gray-500 mt-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" /></svg>
+            <span>${data.location || "Location not specified"}</span>
+          </div>
+        </div>
+        <div class="w-full md:w-auto md:ml-auto mt-4 md:mt-0">
+          <button id="edit-freelancer" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">Edit Profile</button>
+        </div>
       </div>
     </div>
-
-
-    <div class="mt-8 text-right">
-      <button id="edit-freelancer"
-        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-        Edit Profile
-      </button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Skills</h3>
+          <div>${skillsHTML}</div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Details</h3>
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+            <div><dt class="font-medium text-gray-500">Education</dt><dd class="text-gray-800 mt-1">${data.education || "N/A"}</dd></div>
+            <div><dt class="font-medium text-gray-500">Date of Birth</dt><dd class="text-gray-800 mt-1">${data.dob || "N/A"}</dd></div>
+            <div><dt class="font-medium text-gray-500">Availability</dt><dd class="text-gray-800 mt-1">${data.availability_display || "N/A"}</dd></div>
+            <div><dt class="font-medium text-gray-500">Expected Hourly Rate</dt><dd class="text-gray-800 mt-1">${data.expected_salary ? `$${data.expected_salary} USD` : "N/A"}</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="space-y-6">
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Contact & Links</h3>
+          <ul class="space-y-3">
+            ${createIconListItem(ICONS.envelope, data.email)}
+            ${createIconListItem(ICONS.phone, data.phone)}
+            ${createIconListItem(ICONS.link, data.portfolio_url, true)}
+            ${createIconListItem(ICONS.codeBracket, data.github_url, true)}
+            ${createIconListItem(ICONS.userCircle, data.linkedin_url, true)}
+          </ul>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Resume</h3>
+          ${data.resume 
+            ? `<a href="${data.resume}" target="_blank" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>Download Resume</a>`
+            : '<p class="text-gray-500">No resume uploaded.</p>'}
+        </div>
+      </div>
     </div>
-  `;
-
+    `;
     view.classList.remove("hidden");
     form.classList.add("hidden");
-    // Edit button logic
     const editBtn = document.getElementById("edit-freelancer");
     if (editBtn) {
       editBtn.onclick = () => {
@@ -354,84 +220,52 @@ document.addEventListener("DOMContentLoaded", () => {
         form.experience.value = data.experience || "";
         form.portfolio_url.value = data.portfolio_url || "";
         form.github_url.value = data.github_url || "";
-        linkedin_url = data.linkedin_url || "";
-        expected_salary = data.expected_salary || "";
-        availability = data.availability || "";
-
-        const selectedIds = data.skills
-          ? data.skills.map((s) => s.id.toString())
-          : [];
+        form.linkedin_url.value = data.linkedin_url || "";
+        form.expected_salary.value = data.expected_salary || "";
+        form.availability.value = data.availability || "";
+        const resumeDisplay = document.getElementById("current-resume-display");
+        if (data.resume) {
+          resumeDisplay.innerHTML = `
+            <p class="mb-1">
+              <b>Current Resume:</b> 
+              <a href="${data.resume}" target="_blank" class="text-blue-600 hover:underline">View File</a>
+            </p>
+            <p class="text-xs text-gray-500">Upload a new file below only if you want to replace it.</p>
+          `;
+        } else {
+          resumeDisplay.innerHTML = "";
+        }
+        const selectedIds = data.skills ? data.skills.map((s) => s.id.toString()) : [];
         loadSkillsOptions(selectedIds);
-
         view.classList.add("hidden");
         form.classList.remove("hidden");
       };
     }
-
     const cancelFreelancer = document.getElementById("cancel-freelancer");
     if (cancelFreelancer) {
       cancelFreelancer.onclick = (e) => {
         e.preventDefault();
-        const menu = document.getElementById("skills-menu");
-        if (menu) menu.classList.add("hidden");
-
-        form.reset();
-
-        const hiddenSkills = document.getElementById("skills-hidden");
-        if (hiddenSkills) hiddenSkills.value = "";
-
         renderFreelancerView(data);
       };
     }
-
     form.onsubmit = async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-
-      if (
-        fd.get("portfolio_url") &&
-        !/^https?:\/\//i.test(fd.get("portfolio_url"))
-      ) {
-        fd.set("portfolio_url", "https://" + fd.get("portfolio_url"));
-      }
-
-      if (
-        fd.get("github_url") &&
-        !/^https?:\/\//i.test(fd.get("github_url"))
-      ) {
-        fd.set("github_url", "https://" + fd.get("github_url"));
-      }
-
-      if (
-        fd.get("linkedin_url") &&
-        !/^https?:\/\//i.test(fd.get("linkedin_url"))
-      ) {
-        fd.set("linkedin_url", "https://" + fd.get("linkedin_url"));
-      }
-
       const selectedSkills = Array.from(
         document.querySelectorAll("#skills-menu input[type='checkbox']:checked")
       ).map((cb) => cb.value);
-
       fd.delete("skills");
-
       selectedSkills.forEach((id) => fd.append("skill_ids", id));
-
       try {
         const res = await fetch(`${API}/profiles/profile/freelancer/me/`, {
           method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${access}`,
-          },
+          headers: { Authorization: `Bearer ${access}` },
           body: fd,
         });
-
         if (!res.ok) {
           const errData = await res.json();
-          console.error("Freelancer update error:", errData);
           throw new Error(JSON.stringify(errData));
         }
-
         const updated = await res.json();
         showAlert("Profile updated ✅");
         renderFreelancerView(updated);
@@ -449,23 +283,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const menu = document.getElementById("skills-menu");
         const label = document.getElementById("skills-label");
         const hiddenInput = document.getElementById("skills-hidden");
+        if (!menu || !label || !hiddenInput) return;
         menu.innerHTML = "";
-
         skills.forEach((skill) => {
           const isChecked = selectedIds.includes(skill.id.toString());
           const option = document.createElement("label");
-          option.className =
-            "flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer";
-          option.innerHTML = `
-          <input type="checkbox" value="${
-            skill.id
-          }" class="form-checkbox h-4 w-4 text-blue-600 mr-2"
-            ${isChecked ? "checked" : ""}>
-          <span>${skill.name}</span>
-        `;
+          option.className = "flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer";
+          option.innerHTML = `<input type="checkbox" value="${skill.id}" class="form-checkbox h-4 w-4 text-blue-600 mr-2" ${isChecked ? "checked" : ""}><span>${skill.name}</span>`;
           menu.appendChild(option);
         });
-
         function updateSelection() {
           const checked = Array.from(
             menu.querySelectorAll("input[type='checkbox']:checked")
@@ -473,23 +299,19 @@ document.addEventListener("DOMContentLoaded", () => {
             id: cb.value,
             name: cb.nextElementSibling.textContent,
           }));
-          label.textContent =
-            checked.length > 0
-              ? checked.map((c) => c.name).join(", ")
-              : "Select skills";
+          label.textContent = checked.length > 0 ? checked.map((c) => c.name).join(", ") : "Select skills";
           hiddenInput.value = checked.map((c) => c.id).join(",");
         }
-
         menu.querySelectorAll("input[type='checkbox']").forEach((cb) => {
           cb.addEventListener("change", updateSelection);
         });
-
         updateSelection();
       }
     } catch (err) {
       console.error("Failed to load skills", err);
     }
   }
+  
   loadSkillsOptions();
   loadProfile();
 });
@@ -497,13 +319,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.getElementById("skills-toggle");
   const menu = document.getElementById("skills-menu");
-
   if (toggle && menu) {
     toggle.addEventListener("click", (e) => {
       e.preventDefault();
       menu.classList.toggle("hidden");
     });
-
     document.addEventListener("click", (e) => {
       if (!menu.contains(e.target) && !toggle.contains(e.target)) {
         menu.classList.add("hidden");

@@ -20,6 +20,20 @@ function renderNavbar() {
     `;
   } else if (role === "freelancer") {
     navbar.innerHTML = `
+        <div class="relative" id="notification-container">
+        <button id="notification-bell" class="text-gray-500 hover:text-blue-600 relative flex items-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span id="notification-badge" class="absolute -top-1 -right-1 block h-3 w-3 rounded-full bg-red-500 border-2 border-white hidden"></span>
+        </button>
+        <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl overflow-hidden z-20 hidden">
+            <div class="py-2 px-4 text-sm font-semibold text-gray-700 border-b">
+                <span>Notifications</span>
+            </div>
+            <div id="notification-list" class="divide-y max-h-96 overflow-y-auto">
+                </div>
+        </div>
+    </div>
+    <button onclick="window.location.href='freelancer_dashboard.html'" class="text-gray-700 hover:text-blue-600">Dashboard</button>
     <button onclick="window.location.href='jobs.html'" class="text-gray-700 hover:text-blue-600">Browse Jobs</button>
     <button onclick="window.location.href='my-applications.html'" class="text-gray-700 hover:text-blue-600">My Applications</button>
     <button onclick="window.location.href='profile-setup.html'" class="text-gray-700 hover:text-blue-600">Profile (${role})</button>
@@ -116,4 +130,73 @@ function showNotification(message, type = "success") {
     notif.classList.add("opacity-0", "transition", "duration-500");
     setTimeout(() => notif.remove(), 500);
   }, 3000);
+}
+
+
+async function handleNotifications() {
+    const { access, role } = getAuth();
+    if (role !== 'freelancer' || !access) return;
+
+    const bell = document.getElementById('notification-bell');
+    const badge = document.getElementById('notification-badge');
+    const dropdown = document.getElementById('notification-dropdown');
+    const list = document.getElementById('notification-list');
+
+    bell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+        if (!dropdown.classList.contains('hidden')) {
+            dropdown.classList.add('hidden');
+        }
+    });
+
+    try {
+        const res = await fetch(`${API}/profiles/notifications/`, {
+            headers: { Authorization: `Bearer ${access}` }
+        });
+        if (!res.ok) throw new Error('Could not fetch notifications.');
+        const notifications = await res.json();
+
+        if (notifications.length > 0) {
+            badge.classList.remove('hidden');
+            list.innerHTML = notifications.map(n => `
+                <a href="${n.link || '#'}" 
+                   class="notification-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                   data-id="${n.id}">
+                    <p class="font-semibold">${n.verb}</p>
+                    <p class="text-xs text-gray-500">${new Date(n.timestamp).toLocaleString()}</p>
+                </a>
+            `).join('');
+        } else {
+            list.innerHTML = `<p class="text-center text-sm text-gray-500 py-4">No new notifications</p>`;
+            badge.classList.add('hidden');
+        }
+    } catch (err) {
+        list.innerHTML = `<p class="text-center text-sm text-red-500 py-4">Error loading notifications</p>`;
+        console.error(err);
+    }
+
+    list.addEventListener('click', async (e) => {
+        const notificationItem = e.target.closest('.notification-item');
+        if (!notificationItem) return;
+
+        const notificationId = notificationItem.dataset.id;
+        
+        notificationItem.style.opacity = '0.5';
+        notificationItem.style.pointerEvents = 'none';
+
+        try {
+            await fetch(`${API}/profiles/notifications/${notificationId}/read/`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${access}` }
+            });
+        } catch (err) {
+            console.error('Failed to mark notification as read:', err);
+            notificationItem.style.opacity = '1';
+            notificationItem.style.pointerEvents = 'auto';
+        }
+    });
 }

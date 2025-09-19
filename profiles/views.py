@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
-from .models import RecruiterProfile, FreelancerProfile, Skill
-from .serializers import RecruiterProfileSerializer, FreelancerProfileSerializer, SkillSerializer
+from .models import RecruiterProfile, FreelancerProfile, Skill, Notification
+from .serializers import RecruiterProfileSerializer, FreelancerProfileSerializer, SkillSerializer, NotificationSerializer
 from .permissions import IsRecruiter, IsFreelancer
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -23,3 +23,18 @@ class MeFreelancerProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user.freelancer_profile
+    
+class MyNotificationsView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by("-created_at")
+
+
+class MarkNotificationReadView(generics.UpdateAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)

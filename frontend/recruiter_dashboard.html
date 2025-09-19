@@ -7,10 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Chart container with a responsive aspect ratio */
     .chart-container {
       position: relative;
-      height: 18rem; /* h-72 */
+      height: 18rem;
       width: 100%;
     }
     @keyframes fadeIn {
@@ -20,7 +19,7 @@
     .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
   </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="min-h-screen flex flex-col bg-gradient-to-r from-blue-100 via-white to-blue-100 font-sans">
 
   <header class="bg-white shadow-md sticky top-0 z-50">
     <div class="mx-auto px-6 py-4 flex justify-between items-center">

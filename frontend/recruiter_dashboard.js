@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // --- 1. Authentication and Initial Setup ---
   const { access, role } = getAuth();
   if (!access || role !== "recruiter") {
     window.location.href = "auth.html";
@@ -7,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   renderNavbar();
 
-  // Display current date
   const dateElement = document.getElementById("today-date");
   if (dateElement) {
     dateElement.textContent = new Date().toLocaleDateString("en-US", {
@@ -18,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- 2. Data Fetching ---
   async function loadDashboardData() {
     const headers = { Authorization: `Bearer ${access}` };
     try {
@@ -32,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const jobs = await jobsRes.json();
       const applications = await appsRes.json();
 
-      // --- 3. Populate Dashboard Sections ---
       populateStats(jobs, applications);
       populateRecentApplications(applications);
       populateRecentActivity(jobs, applications);
@@ -43,8 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
       showNotification(error.message, "error");
     }
   }
-
-  // --- 4. UI Population Functions ---
 
   function animateNumber(element, target) {
     let current = 0;
@@ -80,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.getElementById("recent-applications-body");
     if (!tableBody) return;
 
-    // Sort by most recent and take the top 5
     const recentApps = applications
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
       .slice(0, 5);
@@ -120,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const allActivities = [...jobActivities, ...appActivities]
           .sort((a, b) => b.date - a.date)
-          .slice(0, 7); // Get latest 7 activities
+          .slice(0, 7);
 
       if (allActivities.length === 0) {
           activityList.innerHTML = `<li class="text-center p-4 text-gray-500">No recent activity.</li>`;
@@ -141,7 +134,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // --- 5. Chart Rendering Functions ---
 
   function renderApplicationsPerJobChart(applications) {
     const ctx = document.getElementById("barChart")?.getContext("2d");
@@ -200,7 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Utility (reused from applications.js) ---
   function renderStatusBadge(status) {
     let colorClasses = "";
     let label = status.charAt(0).toUpperCase() + status.slice(1);
