@@ -42,6 +42,11 @@ class Skill(models.Model):
 
 ############################################################
 
+def profilepic_upload_path(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    new_filename = f"{uuid.uuid4()}{ext}"
+    return os.path.join('profilepic', new_filename)
+
 class FreelancerProfile(models.Model):
 
     EXPERIENCE_CHOICES = [
@@ -74,9 +79,20 @@ class FreelancerProfile(models.Model):
     resume = models.FileField(upload_to=resume_upload_path, blank=True, null=True)
     expected_salary = models.FloatField(blank=True, default=0.0)
     availability = models.CharField(max_length=20, choices=AVAILABILITY_CHOICES, blank=True)
+    profilepic = models.ImageField(upload_to=profilepic_upload_path, blank=True, null=True)
 
     def __str__(self):
         return f"FreelancerProfile<{self.user}>"
+    
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification<{self.user} - {self.message[:30]}>"
 
 UserModel = get_user_model()
 

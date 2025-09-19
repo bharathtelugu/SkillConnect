@@ -2,6 +2,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Application
+from profiles.models import Notification
 
 @receiver(post_save, sender=Application)
 def send_status_update_email(sender, instance, created, **kwargs):
@@ -9,6 +10,12 @@ def send_status_update_email(sender, instance, created, **kwargs):
         return
 
     freelancer = instance.freelancer
+
+    Notification.objects.create(
+        user=freelancer,
+        message=f"Your application for '{instance.job.title}' is now {instance.get_status_display()}."
+    )
+
     subject = f"Update on your application for {instance.job.title}"
 
 
