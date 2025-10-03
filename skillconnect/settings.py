@@ -236,5 +236,5 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "stat1c8972@gmail.com"
-EMAIL_HOST_PASSWORD = "tuif irex fccr oyqg"  # use app password for Gmail
+EMAIL_HOST_PASSWORD = ""  # use app password for Gmail
 DEFAULT_FROM_EMAIL = "Skill Connect stat1c8972@gmail.com"
